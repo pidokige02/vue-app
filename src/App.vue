@@ -1,12 +1,18 @@
 <template>
   <div>
-    <p v-for="book in result.allBooks" :key="book.id">
-      {{ book.title }}
-    </p>
+    <input type="text" v-model="searchTerm" />
+    <p v-if="loading">Loading...</p>
+    <p v-else-if="error">Something went wrong! Please try again</p>
+    <template v-else>
+      <p v-for="book in result.allBooks" :key="book.id">
+        {{ book.title }}
+      </p>
+    </template>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 // import gql from 'graphql-tag' // utility to parse GraphQL queries.
 
@@ -19,18 +25,21 @@ import { useQuery } from '@vue/apollo-composable'
 //     }
 //   }
 // `
-import ALL_BOOKS_QUERY from './graphql/allBooks.query.gql'
-
+import ALL_BOOKS_QUERY from './graphql/allBooks.query.gql' //imported from file
 
 export default {
   name: 'App',
   setup() {
+    // setup() is executed before the component is created, once the props are resolved, and serves as the entry point for composables.
+    const searchTerm = ref('')  // create a reactive property with 'ref'
     // It’s executed before the component is created, once the props are resolved, and serves as the entry point for composables.
-    const { result } = useQuery(ALL_BOOKS_QUERY) //it performs a GraphQL query
+    const { result, loading, error } = useQuery(ALL_BOOKS_QUERY, () => ({
+      search: searchTerm.value
+    }))
 
-    console.log(result)
+     // console.log(result)
 
-    return { result }
+    return { result, searchTerm, loading, error } // don't forget to return 'searchTerm'!
   },
 }
 </script>
